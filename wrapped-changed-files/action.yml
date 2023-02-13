@@ -24,12 +24,12 @@ runs:
       with:
         json: "true"
         files: ${{ inputs.files }}
-    - name: List all changed file(s)
-      id: set-matrix
-      shell: bash
-      run: |
-        echo all_changed_files=${{ steps.changed-files-as-json.outputs.all_changed_files }} >> $GITHUB_OUTPUT
-        echo any_changed=${{ steps.changed-files-as-json.outputs.any_changed }} >> $GITHUB_OUTPUT
+#     - name: List all changed file(s)
+#       id: set-matrix
+#       shell: bash
+#       run: |
+#         echo all_changed_files=${{ steps.changed-files-as-json.outputs.all_changed_files }} >> $GITHUB_OUTPUT
+#         echo any_changed=${{ steps.changed-files-as-json.outputs.any_changed }} >> $GITHUB_OUTPUT
 
 branding:
   icon: file-text
