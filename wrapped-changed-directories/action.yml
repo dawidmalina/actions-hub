@@ -38,6 +38,7 @@ runs:
         # debug
         echo other_changed_files=${{ steps.changed-directories-as-json.outputs.other_changed_files }}
         echo any_changed=${{ steps.changed-directories-as-json.outputs.any_changed }}
+        echo all_changed_files=${{ steps.changed-directories-as-json.outputs.all_changed_files }}
 
         echo other_changed_files=${{ steps.changed-directories-as-json.outputs.other_changed_files }} >> $GITHUB_OUTPUT
         echo any_changed=${{ steps.changed-directories-as-json.outputs.any_changed }} >> $GITHUB_OUTPUT
