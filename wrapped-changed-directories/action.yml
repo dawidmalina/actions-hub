@@ -27,6 +27,7 @@ runs:
       id: changed-directories-as-json
       with:
         json: "true"
+        dir_names: "true"
         dir_names_max_depth: ${{ inputs.dir_names_max_depth }}
         dir_names_exclude_root: "true"
         files_ignore: ${{ inputs.files_ignore }}
