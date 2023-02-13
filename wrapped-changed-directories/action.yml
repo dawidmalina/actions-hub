@@ -11,10 +11,10 @@ inputs:
 outputs:
   all_changed_files:
     description: "Returns all changed files i.e. *a combination of all added, copied, modified and renamed files (ACMR)*"
-    value: ${{ steps.changed-files.outputs.all_changed_files }}
+    value: ${{ steps.set-values.outputs.all_changed_files }}
   any_changed:
     description: "Returns `true` when any of the filenames provided using the `files` input has changed. If no `files` have been specified,an empty string `''` is returned. i.e. *using a combination of all added, copied, modified and renamed files (ACMR)*."
-    value: ${{ steps.changed-files.outputs.any_changed }}
+    value: ${{ steps.set-values.outputs.any_changed }}
 
 runs:
   using: "composite"
@@ -26,12 +26,16 @@ runs:
         dir_names_max_depth: "1"
         dir_names_exclude_root: "true"
         files_ignore: ${{ inputs.files_ignore }}
-    - name: List all changed Dockerfile(s)
-      id: set-matrix
-      if: steps.changed-files-as-json.outputs.ANY_CHANGED == 'true'
+    - name: List all changed dir(s)
+      id: set-values
+      shell: bash
       run: |
-        echo all_changed_files=${{ steps.changed-files-as-json.outputs.all_changed_files }} >> $GITHUB_OUTPUT
-        echo any_changed=${{ steps.changed-files-as-json.outputs.any_changed }} >> $GITHUB_OUTPUT
+        # debug
+        echo all_changed_files=${{ steps.changed-directories-as-json.outputs.all_changed_files }}
+        echo any_changed=${{ steps.changed-directories-as-json.outputs.any_changed }}
+        
+        echo all_changed_files=${{ steps.changed-directories-as-json.outputs.all_changed_files }} >> $GITHUB_OUTPUT
+        echo any_changed=${{ steps.changed-directories-as-json.outputs.any_changed }} >> $GITHUB_OUTPUT
 
 branding:
   icon: file-text
