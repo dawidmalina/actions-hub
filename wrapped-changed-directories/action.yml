@@ -13,9 +13,9 @@ inputs:
     default: "2"
 
 outputs:
-  all_changed_files:
-    description: "Returns all changed files i.e. *a combination of all added, copied, modified and renamed files (ACMR)*"
-    value: ${{ steps.set-values.outputs.all_changed_files }}
+  other_changed_files:
+    description: "Returns all other changed files not listed in the files input i.e. *using a combination of all added, copied, modified and renamed files (ACMR)*."
+    value: ${{ steps.set-values.outputs.other_changed_files }}
   any_changed:
     description: "Returns `true` when any of the filenames provided using the `files` input has changed. If no `files` have been specified,an empty string `''` is returned. i.e. *using a combination of all added, copied, modified and renamed files (ACMR)*."
     value: ${{ steps.set-values.outputs.any_changed }}
@@ -35,12 +35,10 @@ runs:
       shell: bash
       run: |
         # debug
-        echo all_changed_files=${{ steps.changed-directories-as-json.outputs.all_changed_files }}
-        echo any_changed=${{ steps.changed-directories-as-json.outputs.any_changed }}
-        
         echo other_changed_files=${{ steps.changed-directories-as-json.outputs.other_changed_files }}
-        
-        echo all_changed_files=${{ steps.changed-directories-as-json.outputs.all_changed_files }} >> $GITHUB_OUTPUT
+        echo any_changed=${{ steps.changed-directories-as-json.outputs.any_changed }}
+
+        echo other_changed_files=${{ steps.changed-directories-as-json.outputs.other_changed_files }} >> $GITHUB_OUTPUT
         echo any_changed=${{ steps.changed-directories-as-json.outputs.any_changed }} >> $GITHUB_OUTPUT
 
 branding:
