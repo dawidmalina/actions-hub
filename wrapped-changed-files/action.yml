@@ -26,7 +26,6 @@ runs:
         files: ${{ inputs.files }}
     - name: List all changed Dockerfile(s)
       id: set-matrix
-      if: steps.changed-files-as-json.outputs.ANY_CHANGED == 'true'
       run: |
         echo all_changed_files=${{ steps.changed-files-as-json.outputs.all_changed_files }} >> $GITHUB_OUTPUT
         echo any_changed=${{ steps.changed-files-as-json.outputs.any_changed }} >> $GITHUB_OUTPUT
