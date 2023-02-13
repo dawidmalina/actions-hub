@@ -1,0 +1,38 @@
+name: Wrapped Changed Directories
+description: Get all Changed Directories.
+author: dawidmalina
+
+inputs:
+  files_ignore:
+    description: "Ignore changes to these file(s) **NOTE:** Multiline file/directory patterns should not include quotes."
+    required: false
+    default: ""
+
+outputs:
+  all_changed_files:
+    description: "Returns all changed files i.e. *a combination of all added, copied, modified and renamed files (ACMR)*"
+    value: ${{ steps.changed-files.outputs.all_changed_files }}
+  any_changed:
+    description: "Returns `true` when any of the filenames provided using the `files` input has changed. If no `files` have been specified,an empty string `''` is returned. i.e. *using a combination of all added, copied, modified and renamed files (ACMR)*."
+    value: ${{ steps.changed-files.outputs.any_changed }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: tj-actions/changed-files@v35
+      id: changed-directories-as-json
+      with:
+        json: "true"
+        dir_names_max_depth: "1"
+        dir_names_exclude_root: "true"
+        files_ignore: ${{ inputs.files_ignore }}
+    - name: List all changed Dockerfile(s)
+      id: set-matrix
+      if: steps.changed-files-as-json.outputs.ANY_CHANGED == 'true'
+      run: |
+        echo all_changed_files=${{ steps.changed-files-as-json.outputs.all_changed_files }} >> $GITHUB_OUTPUT
+        echo any_changed=${{ steps.changed-files-as-json.outputs.any_changed }} >> $GITHUB_OUTPUT
+
+branding:
+  icon: file-text
+  color: white
