@@ -16,6 +16,10 @@ runs:
         curl "$installScript" 2>/dev/null | bash >/dev/null
       shell: bash
     - run: |
+        # build dependencies
+        helm dependency build ${{ inputs.chart }}
+        
+        # lint chart
         helm lint ${{ inputs.chart }}
       shell: bash
 
