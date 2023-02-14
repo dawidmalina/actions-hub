@@ -1,0 +1,24 @@
+name: Simple helm linter
+description: Lint local helm chart.
+author: dawidmalina
+
+chart:
+  files:
+    description: "Local path to helm chart."
+    required: true
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        installScript=https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+        curl "$installScript" 2>/dev/null | bash >/dev/null
+      shell: bash
+   - run: |
+      helm lint ${{ inputs.chart }}
+     shell: bash
+
+branding:
+  icon: file-text
+  color: white
