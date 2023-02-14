@@ -2,8 +2,8 @@ name: Simple helm linter
 description: Lint local helm chart.
 author: dawidmalina
 
-chart:
-  files:
+inputs:
+  chart:
     description: "Local path to helm chart."
     required: true
     default: ""
