@@ -15,9 +15,9 @@ runs:
         installScript=https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
         curl "$installScript" 2>/dev/null | bash >/dev/null
       shell: bash
-   - run: |
-      helm lint ${{ inputs.chart }}
-     shell: bash
+    - run: |
+        helm lint ${{ inputs.chart }}
+      shell: bash
 
 branding:
   icon: file-text
