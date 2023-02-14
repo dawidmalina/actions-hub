@@ -20,7 +20,7 @@ runs:
         helm dependency build ${{ inputs.chart }}
         
         # lint chart
-        helm lint ${{ inputs.chart }}
+        helm lint --quiet ${{ inputs.chart }}
       shell: bash
 
 branding:
