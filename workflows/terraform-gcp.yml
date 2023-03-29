@@ -1,15 +1,15 @@
 name: "Terraform"
 
 on:
-  pull_request:
-    # paths: # setup paths if necessary
-    branches:
-      - main
-    types:
-      - opened # default
-      - synchronize # default
-      - reopened # default
-      - closed # needed to handle action after merge
+#   pull_request:
+#     # paths: # setup paths if necessary
+#     branches:
+#       - main
+#     types:
+#       - opened # default
+#       - synchronize # default
+#       - reopened # default
+#       - closed # needed to handle action after merge
 
   # define reusable section
   workflow_call:
