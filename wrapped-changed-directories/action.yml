@@ -3,6 +3,10 @@ description: Get all changed directories.
 author: dawidmalina
 
 inputs:
+  files:
+    description: "File and directory patterns to detect changes using only these list of file(s) (Defaults to the entire repo) **NOTE:** Multiline file/directory patterns should not include quotes."
+    required: false
+    default: ""
   files_ignore:
     description: "Ignore changes to these file(s) **NOTE:** Multiline file/directory patterns should not include quotes."
     required: false
@@ -30,6 +34,7 @@ runs:
         dir_names: "true"
         dir_names_max_depth: ${{ inputs.dir_names_max_depth }}
         dir_names_exclude_root: "true"
+        files: ${{ inputs.files }}
         files_ignore: ${{ inputs.files_ignore }}
     - name: List all changed dir(s)
       id: set-values
