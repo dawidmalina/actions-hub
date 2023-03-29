@@ -1,35 +1,41 @@
 name: "Terraform"
 
 on:
-#   pull_request:
-#     # paths: # setup paths if necessary
-#     branches:
-#       - main
-#     types:
-#       - opened # default
-#       - synchronize # default
-#       - reopened # default
-#       - closed # needed to handle action after merge
-
   # define reusable section
   workflow_call:
     inputs:
-      working_dir:
-        required: true
-        type: string
       project_id:
         required: true
         type: string
     secrets:
       GOOGLE_CREDENTIALS:
         required: true
-#       GITHUB_TOKEN:
-#         required: true
 
 env:
   TERRAFORM_VERSION: 1.3.7
 
 jobs:
+  prepare:
+    name: Get changed environments(s)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Get changed environments(s)
+        id: changes-as-json
+        uses: dawidmalina/actions-hub/wrapped-changed-directories@main
+        with:
+          dir_names_max_depth: "3"
+          files: |
+            **/*.tf
+#           files_ignore: |
+#             .github
+    outputs:
+      all_changed_files: ${{ steps.changes-as-json.outputs.all_changed_files }}
+      any_changed: ${{ steps.changes-as-json.outputs.any_changed }}
+
+
   terraform:
     name: "Terraform"
     permissions:
@@ -37,13 +43,18 @@ jobs:
       id-token: write
       pull-requests: write
     runs-on: ubuntu-latest
+    if: needs.prepare.outputs.any_changed == 'true'
+    needs: prepare
+    strategy:
+      matrix:
+        dir: ${{ fromJson(needs.prepare.outputs.all_changed_files) }}
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     # Set the working directory to main for the config files
     defaults:
       run:
         shell: bash
-        working-directory: ${{ inputs.working_dir }}
+        working-directory: ${{ matrix.dir }}
 
     steps:
       # Make sure GitHUb Actions runner is monitored (secured)
@@ -158,7 +169,7 @@ jobs:
             ${{ steps.apply.outputs.stdout }}
             \`\`\`
             </details>\n
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ inputs.working_dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ matrix.dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
