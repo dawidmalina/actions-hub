@@ -120,6 +120,10 @@ jobs:
         run: |
           terraform plan -no-color -out tfplan
 
+          pwd
+          ls -lta
+          cat tfplan
+
       # Save plan to artifacts
       - name: Save Plan
         if: github.event.pull_request.merged != true && github.event.pull_request.state == 'open'
