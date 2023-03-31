@@ -121,9 +121,9 @@ jobs:
           terraform plan -no-color -out tfplan >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
-          echo 'summary<<EOF' >> $GITHUB_OUTPUT
-          terraform show -no-color tfplan |grep -E 'Plan:|No changes' >> $GITHUB_OUTPUT
-          echo 'EOF' >> $GITHUB_OUTPUT
+          # echo 'summary<<EOF' >> $GITHUB_OUTPUT
+          # terraform show -no-color tfplan |grep -E 'Plan:|No changes' >> $GITHUB_OUTPUT
+          # echo 'EOF' >> $GITHUB_OUTPUT
 
       # Save plan to artifacts
       - name: Save Plan
