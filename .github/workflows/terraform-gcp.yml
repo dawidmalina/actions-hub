@@ -117,19 +117,34 @@ jobs:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           TF_VAR_project_id: ${{ inputs.project_id }}
         run: |
-          terraform plan -no-color
+          terraform plan -no-color -out tfplan
+
+          echo "tfplan=$( terraform show -no-color tfplan )" >> $GITHUB_OUTPUT
+          echo "summary=$( terraform show -no-color tfplan |grep -E 'Plan:|No changes' )" >> $GITHUB_OUTPUT
+
+      # Save plan to artifacts
+      - name: Save Plan
+        id: save-plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: tfplan
+          path: tfplan
 
       # Add a comment to pull requests with plan results
-      - name: add-plan-comment
+      - name: Add Plan Comment
         if: github.event.pull_request.merged != true
-        id: comment
+        id: plan-comment
         uses: actions/github-script@v6
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `#### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
+            const output = `Test\n
+            \`\`\`\n
+            ${{ steps.plan.outputs.summary }}
+            \`\`\`
+            #### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
             #### Terraform Security 🛡️ \`${{ steps.security.outcome }}\`
@@ -141,7 +156,7 @@ jobs:
             #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
             <details><summary>Show Plan</summary>\n
             \`\`\`\n
-            ${{ steps.plan.outputs.stdout }}
+            ${{ steps.plan.outputs.tfplan }}
             \`\`\`
             </details>\n
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ matrix.dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
@@ -153,7 +168,14 @@ jobs:
               body: output
             })
 
-        # On push to main, build or change infrastructure according to Terraform configuration files
+      # Download saved plan from artifacts
+      - name: Download Terraform Plan
+        id: download-plan
+        uses: actions/download-artifact@v3
+        with:
+          name: tfplan
+
+      # On push to main, build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply
         if: github.event.pull_request.merged == true && github.event.review.state == 'approved'
         id: apply
@@ -161,10 +183,12 @@ jobs:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           TF_VAR_project_id: ${{ inputs.project_id }}
         run: |
-          terraform apply -auto-approve -input=false -no-color
+          terraform apply -auto-approve -input=false -no-color tfplan
 
-      - uses: actions/github-script@v6
+      - name: Add Apply Comment
         if: github.event.pull_request.merged == true && github.event.review.state == 'approved'
+        id: apply-comment
+        uses: actions/github-script@v6
         with:
           script: |
             const output = `#### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
