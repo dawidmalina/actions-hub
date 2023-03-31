@@ -122,11 +122,11 @@ jobs:
           terraform plan -no-color -out tfplan
 
           echo "SUMMARY<<EOF" >> $GITHUB_ENV
-          terraform show -no-color tfplan |grep -E 'Plan:|No changes' >> $GITHUB_ENV
+          terraform show -no-color tfplan |grep -E 'Plan:|No changes' |sed '1{/^$/d}' >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
           echo "TF_PLAN<<EOF" >> $GITHUB_ENV
-          terraform show -no-color tfplan >> $GITHUB_ENV
+          terraform show -no-color tfplan |sed '1{/^$/d}' >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       # Save plan to artifacts
