@@ -123,7 +123,9 @@ jobs:
           terraform show -no-color tfplan >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
-          echo "summary=$( terraform show -no-color tfplan |grep -E 'Plan:|No changes' )" >> $GITHUB_OUTPUT
+          echo 'summary<<EOF' >> $GITHUB_OUTPUT
+          terraform show -no-color tfplan |grep -E 'Plan:|No changes' >> $GITHUB_OUTPUT
+          echo 'EOF' >> $GITHUB_OUTPUT
 
       # Save plan to artifacts
       - name: Save Plan
@@ -138,8 +140,8 @@ jobs:
         if: github.event.pull_request.merged != true
         id: plan-comment
         uses: actions/github-script@v6
-        env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        # env:
+        #   PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
