@@ -120,12 +120,11 @@ jobs:
         run: |
           terraform plan -no-color -out tfplan
 
-          pwd
-          ls -lta
-          cat tfplan
+          echo "summary=$( terraform show -no-color tfplan |grep -E 'Plan:|No changes' |tr -d '\n' )" >> $GITHUB_OUTPUT
 
-          echo "test1=$( date )" >> "$GITHUB_OUTPUT"
-          echo "test2=$( ls -lta )" >> "$GITHUB_OUTPUT"
+          echo "TF_PLAN<<EOF" >> $GITHUB_ENV
+          terraform show -no-color tfplan >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       # Save plan to artifacts
       - name: Save Plan
@@ -146,6 +145,9 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = `Environment: ${{ matrix.dir }}\n
+            \`\`\`\n
+            ${{ steps.plan.outputs.summary }}
+            \`\`\`
             #### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
@@ -158,12 +160,7 @@ jobs:
             #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
             <details><summary>Show Plan</summary>\n
             \`\`\`\n
-            ${{ steps.plan.outputs.stdout }}
-            \`\`\`
-            x
-            \`\`\`
-            ${{ steps.plan.outputs.test1 }}
-            ${{ steps.plan.outputs.test2 }}
+            ${{ env.TF_PLAN }}
             \`\`\`
             </details>\n
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ matrix.dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
