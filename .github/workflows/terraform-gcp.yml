@@ -127,7 +127,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: tfplan
-          path: tfplan
+          path: ${{ matrix.dir }}/tfplan
           # if-no-files-found: ignore
 
       # Add a comment to pull requests with plan results
