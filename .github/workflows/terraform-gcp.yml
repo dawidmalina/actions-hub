@@ -117,7 +117,7 @@ jobs:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           TF_VAR_project_id: ${{ inputs.project_id }}
         run: |
-          terraform plan -no-color -out tfplan
+          # terraform plan -no-color -out tfplan
 
           # echo 'tfplan=<<EOF' >> $GITHUB_OUTPUT
           # terraform show -no-color tfplan |tr -d '\n' >> $GITHUB_OUTPUT
@@ -125,8 +125,21 @@ jobs:
 
           # echo "summary=$( terraform show -no-color tfplan |grep -E 'Plan:|No changes' |tr -d '\n' )" >> $GITHUB_OUTPUT
 
-          echo summary=$( terraform show -no-color tfplan |grep -E 'Plan:|No changes' |tr -d '\n' )
-          echo tfplan=$( terraform show -no-color tfplan |tr -d '\n' )
+          # echo summary=$( terraform show -no-color tfplan |grep -E 'Plan:|No changes' |tr -d '\n' )
+          # echo tfplan=$( terraform show -no-color tfplan |tr -d '\n' )
+
+          TERRAFORM_PLAN=$(terraform show -no-color tfplan)
+          
+          delimiter="$(openssl rand -hex 8)"
+          echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
+          echo "## Terraform Plan Output" >> $GITHUB_OUTPUT
+          echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo '```terraform' >> $GITHUB_OUTPUT
+          echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
+          echo '```' >> $GITHUB_OUTPUT
+          echo "</details>" >> $GITHUB_OUTPUT
+          echo "${delimiter}" >> $GITHUB_OUTPUT
 
       # Save plan to artifacts
       - name: Save Plan
