@@ -80,7 +80,7 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - name: Terraform Fmt
-        if: github.event.pull_request.merged != true && github.event.pull_request.state == 'open'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
         id: fmt
         run: |
           terraform fmt -check
@@ -95,14 +95,14 @@ jobs:
           terraform init
 
       - name: Terraform Security
-        if: github.event.pull_request.merged != true && github.event.pull_request.state == 'open'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
         id: security
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
           soft_fail: true
 
       - name: Terraform Validate
-        if: github.event.pull_request.merged != true && github.event.pull_request.state == 'open'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
         id: validate
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
@@ -112,7 +112,7 @@ jobs:
 
       # Run a terraform plan for pull requests only
       - name: Terraform Plan
-        if: github.event.pull_request.merged != true && github.event.pull_request.state == 'open'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
         id: plan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
@@ -129,7 +129,7 @@ jobs:
 
       # Save plan to artifacts
       - name: Save Plan
-        if: github.event.pull_request.merged != true && github.event.pull_request.state == 'open'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
         id: save-plan
         uses: actions/upload-artifact@v3
         with:
@@ -139,7 +139,7 @@ jobs:
 
       # Add a comment to pull requests with plan results
       - name: Add Plan Comment
-        if: github.event.pull_request.merged != true && github.event.pull_request.state == 'open'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
         id: plan-comment
         uses: actions/github-script@v6
         with:
