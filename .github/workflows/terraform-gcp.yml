@@ -155,7 +155,7 @@ jobs:
 
         # On push to main, build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply
-        if: github.event.pull_request.merged == true
+        if: github.event.pull_request.merged == true && github.event.review.state == 'approved'
         id: apply
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
@@ -164,7 +164,7 @@ jobs:
           terraform apply -auto-approve -input=false -no-color
 
       - uses: actions/github-script@v6
-        if: github.event.pull_request.merged == true
+        if: github.event.pull_request.merged == true && github.event.review.state == 'approved'
         with:
           script: |
             const output = `#### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
