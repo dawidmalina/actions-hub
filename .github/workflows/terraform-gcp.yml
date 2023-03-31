@@ -124,8 +124,8 @@ jobs:
           ls -lta
           cat tfplan
 
-          echo "test1=hello" >> "$GITHUB_OUTPUT"
-          echo "test2=$( date )" >> "$GITHUB_OUTPUT"
+          echo "test1=$( date )" >> "$GITHUB_OUTPUT"
+          echo "test2=$( ls -lta )" >> "$GITHUB_OUTPUT"
 
       # Save plan to artifacts
       - name: Save Plan
