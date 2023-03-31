@@ -119,28 +119,6 @@ jobs:
         run: |
           terraform plan -no-color -out tfplan
 
-          # echo 'tfplan=<<EOF' >> $GITHUB_OUTPUT
-          # terraform show -no-color tfplan |tr -d '\n' >> $GITHUB_OUTPUT
-          # echo 'EOF' >> $GITHUB_OUTPUT
-
-          # echo "summary=$( terraform show -no-color tfplan |grep -E 'Plan:|No changes' |tr -d '\n' )" >> $GITHUB_OUTPUT
-
-          # echo summary=$( terraform show -no-color tfplan |grep -E 'Plan:|No changes' |tr -d '\n' )
-          # echo tfplan=$( terraform show -no-color tfplan |tr -d '\n' )
-
-          TERRAFORM_PLAN=$(terraform show -no-color tfplan)
-          
-          delimiter="$(openssl rand -hex 8)"
-          echo "summary<<${delimiter}" >> $GITHUB_OUTPUT
-          echo "## Terraform Plan Output" >> $GITHUB_OUTPUT
-          echo "<details><summary>Click to expand</summary>" >> $GITHUB_OUTPUT
-          echo "" >> $GITHUB_OUTPUT
-          echo '```terraform' >> $GITHUB_OUTPUT
-          echo "$TERRAFORM_PLAN" >> $GITHUB_OUTPUT
-          echo '```' >> $GITHUB_OUTPUT
-          echo "</details>" >> $GITHUB_OUTPUT
-          echo "${delimiter}" >> $GITHUB_OUTPUT
-
       # Save plan to artifacts
       - name: Save Plan
         id: save-plan
@@ -148,6 +126,7 @@ jobs:
         with:
           name: tfplan
           path: tfplan
+          # if-no-files-found: ignore
 
       # Add a comment to pull requests with plan results
       - name: Add Plan Comment
@@ -158,9 +137,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = `Environment: ${{ matrix.dir }}\n
-            \`\`\`\n
-            ${{ steps.plan.outputs.summary }}
-            \`\`\`
             #### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
             #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
@@ -173,7 +149,7 @@ jobs:
             #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
             <details><summary>Show Plan</summary>\n
             \`\`\`\n
-            ${{ steps.plan.outputs.summary }}
+            ${{ steps.plan.outputs.stdout }}
             \`\`\`
             </details>\n
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ matrix.dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
