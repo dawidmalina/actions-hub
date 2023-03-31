@@ -125,7 +125,7 @@ jobs:
           cat tfplan
 
           echo "test1=hello" >> "$GITHUB_OUTPUT"
-          echo "test2=world" >> "$GITHUB_OUTPUT"
+          echo "test2=$( date )" >> "$GITHUB_OUTPUT"
 
       # Save plan to artifacts
       - name: Save Plan
