@@ -120,7 +120,9 @@ jobs:
         run: |
           terraform plan -no-color -out tfplan
 
-          echo "summary=$( terraform show -no-color tfplan |grep -E 'Plan:|No changes' |tr -d '\n' )" >> $GITHUB_OUTPUT
+          echo "SUMMARY<<EOF" >> $GITHUB_ENV
+          terraform show -no-color tfplan |grep -E 'Plan:|No changes' >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
           echo "TF_PLAN<<EOF" >> $GITHUB_ENV
           terraform show -no-color tfplan >> $GITHUB_ENV
@@ -146,7 +148,7 @@ jobs:
           script: |
             const output = `Environment: ${{ matrix.dir }}\n
             \`\`\`\n
-            ${{ steps.plan.outputs.summary }}
+            ${{ env.SUMMARY }}
             \`\`\`
             #### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
