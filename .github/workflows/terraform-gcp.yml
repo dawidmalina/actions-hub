@@ -159,6 +159,9 @@ jobs:
             <details><summary>Show Plan</summary>\n
             \`\`\`\n
             ${{ steps.plan.outputs.stdout }}
+            \`\`\`
+            x
+            \`\`\`
             ${{ steps.plan.outputs.test1 }}
             ${{ steps.plan.outputs.test2 }}
             \`\`\`
