@@ -148,7 +148,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const output = `Environment: ${{ matrix.dir }}\n
-            \`\`\`\n
+            \`\`\`
             ${{ env.SUMMARY }}
             \`\`\`
             #### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
@@ -156,13 +156,13 @@ jobs:
             #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
             #### Terraform Security 🛡️ \`${{ steps.security.outcome }}\`
             <details><summary>Validation Output</summary>\n
-            \`\`\`\n
+            \`\`\`
             ${{ steps.validate.outputs.stdout }}
             \`\`\`
             </details>\n
             #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
             <details><summary>Show Plan</summary>\n
-            \`\`\`\n
+            \`\`\`terraform
             ${{ env.TF_PLAN }}
             \`\`\`
             </details>\n
