@@ -121,13 +121,21 @@ jobs:
         run: |
           terraform plan -no-color -out tfplan
 
-          echo "SUMMARY<<EOF" >> $GITHUB_ENV
-          terraform show -no-color tfplan |grep -E 'Plan:|No changes' |sed '1{/^$/d}' >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          # echo "SUMMARY<<EOF" >> $GITHUB_ENV
+          # terraform show -no-color tfplan |grep -E 'Plan:|No changes' |sed '1{/^$/d}' >> $GITHUB_ENV
+          # echo "EOF" >> $GITHUB_ENV
 
-          echo "TF_PLAN<<EOF" >> $GITHUB_ENV
-          terraform show -no-color tfplan |sed '1{/^$/d}' >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          # echo "TF_PLAN<<EOF" >> $GITHUB_ENV
+          # terraform show -no-color tfplan |sed '1{/^$/d}' >> $GITHUB_ENV
+          # echo "EOF" >> $GITHUB_ENV
+
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          terraform show -no-color tfplan |grep -E 'Plan:|No changes' |sed '1{/^$/d}' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "tf_plan<<EOF" >> $GITHUB_OUTPUT
+          terraform show -no-color tfplan |sed '1{/^$/d}' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       # Save plan to artifacts
       - name: Save Plan
@@ -149,7 +157,7 @@ jobs:
           script: |
             const output = `Environment: ${{ matrix.dir }}\n
             \`\`\`
-            ${{ env.SUMMARY }}
+            ${{ steps.plan.outputs.summary }}
             \`\`\`
             #### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
@@ -163,7 +171,7 @@ jobs:
             #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
             <details><summary>Show Plan</summary>\n
             \`\`\`terraform
-            ${{ env.TF_PLAN }}
+            ${{ steps.plan.outputs.tf_plan }}
             \`\`\`
             </details>\n
             *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ matrix.dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
