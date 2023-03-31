@@ -117,10 +117,8 @@ jobs:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           TF_VAR_project_id: ${{ inputs.project_id }}
         run: |
-          terraform plan -no-color -out tfplan
-
           echo 'tfplan<<EOF' >> $GITHUB_OUTPUT
-          terraform show -no-color tfplan >> $GITHUB_OUTPUT
+          terraform plan -no-color -out tfplan >> $GITHUB_OUTPUT
           echo 'EOF' >> $GITHUB_OUTPUT
 
           echo 'summary<<EOF' >> $GITHUB_OUTPUT
@@ -175,6 +173,7 @@ jobs:
 
       # Download saved plan from artifacts
       - name: Download Terraform Plan
+        if: github.event.pull_request.merged == true && github.event.review.state == 'approved'
         id: download-plan
         uses: actions/download-artifact@v3
         with:
