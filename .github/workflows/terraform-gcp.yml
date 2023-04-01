@@ -151,7 +151,7 @@ jobs:
 
       # Save plan to artifacts
       - name: Save Plan
-        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: save-plan
         uses: actions/upload-artifact@v3
         with:
