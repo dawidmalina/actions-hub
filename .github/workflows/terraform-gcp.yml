@@ -200,8 +200,10 @@ jobs:
       - name: Download Terraform Plan
         if: github.event.pull_request.merged == true # && github.event.review.state == 'approved'
         id: download-plan
-        uses: actions/download-artifact@v3
+        uses: dawidd6/action-download-artifact@v2
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr: ${{ github.event.pull_request.number }}
           name: tfplan
 
       # On push to main, build or change infrastructure according to Terraform configuration files
