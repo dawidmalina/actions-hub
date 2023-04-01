@@ -34,7 +34,7 @@ jobs:
       any_changed: ${{ steps.changes-as-json.outputs.any_changed }}
 
   terraform:
-    name: "Terraform"
+    name: plan-apply
     permissions:
       contents: read
       id-token: write
@@ -88,7 +88,7 @@ jobs:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
       - name: Terraform Fmt
-        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: fmt
         run: |
           terraform fmt -check
@@ -103,7 +103,7 @@ jobs:
           terraform init
 
       - name: Terraform Security
-        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: security
         uses: aquasecurity/tfsec-action@v1.0.0
         with:
@@ -119,7 +119,7 @@ jobs:
       #     fail_on_violations: true
 
       - name: Terraform Validate
-        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: validate
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
@@ -129,7 +129,7 @@ jobs:
 
       # Run a terraform plan for pull requests only
       - name: Terraform Plan
-        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: plan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
