@@ -198,7 +198,7 @@ jobs:
 
       # Download saved plan from artifacts
       - name: Download Terraform Plan
-        if: github.event.pull_request.merged == true && github.event.review.state == 'approved'
+        if: github.event.pull_request.merged == true # && github.event.review.state == 'approved'
         id: download-plan
         uses: actions/download-artifact@v3
         with:
