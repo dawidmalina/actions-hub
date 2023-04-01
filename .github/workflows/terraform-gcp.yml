@@ -163,7 +163,7 @@ jobs:
       - name: Add Plan Comment
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
         id: plan-comment
-        uses: unsplash/comment-on-pr@v1
+        uses: unsplash/comment-on-pr@v1.3.0
         with:
           msg: |
             ### Terraform Plan Result
@@ -213,7 +213,7 @@ jobs:
       - name: Add Apply Comment
         if: github.event.pull_request.merged == true && github.event.review.state == 'approved'
         id: apply-comment
-        uses: unsplash/comment-on-pr@v1
+        uses: unsplash/comment-on-pr@v1.3.0
         with:
           msg: |
             ### Terraform Apply Result
