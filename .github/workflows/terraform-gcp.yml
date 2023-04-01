@@ -171,7 +171,7 @@ jobs:
           msg: |
             ### Terraform Plan Result
 
-            The changes contained in this pull request result in the following changes in the `${{ steps.plan.outputs.environment }}` environment (stack `${{ steps.plan.outputs.stack }}`):
+            :ship: Changes contained in this pull request result in the following changes in the `${{ steps.plan.outputs.environment }}` environment (stack `${{ steps.plan.outputs.stack }}`):
 
             ```
             ${{ steps.plan.outputs.summary }}
@@ -188,6 +188,7 @@ jobs:
             | Terraform Plan | `${{ steps.plan.outcome }}` |
 
             <details><summary>Show Plan (click)</summary>
+
             ```terraform
             ${{ steps.plan.outputs.tf_plan }}
             ```
@@ -223,7 +224,7 @@ jobs:
           msg: |
             ### Terraform Apply Result
 
-            :rocket: The changes has been applied in the `${{ steps.plan.outputs.environment }}` environment (stack `${{ steps.plan.outputs.stack }}`).
+            :rocket: Changes has been applied in the `${{ steps.plan.outputs.environment }}` environment (stack `${{ steps.plan.outputs.stack }}`).
 
             <details><summary>Show Plan (click)</summary>
             ```terraform
