@@ -206,7 +206,7 @@ jobs:
 
       # On push to main, build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply
-        if: github.event.pull_request.merged == true && github.event.review.state == 'approved'
+        if: github.event.pull_request.merged == true # && github.event.review.state == 'approved'
         id: apply
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
@@ -215,7 +215,7 @@ jobs:
           terraform apply -auto-approve -input=false -no-color tfplan
 
       - name: Add Apply Comment
-        if: github.event.pull_request.merged == true && github.event.review.state == 'approved'
+        if: github.event.pull_request.merged == true # && github.event.review.state == 'approved'
         id: apply-comment
         uses: unsplash/comment-on-pr@v1.3.0
         env:
@@ -226,7 +226,7 @@ jobs:
 
             :rocket: Changes has been applied in the **`${{ steps.plan.outputs.environment }}`** environment (stack **`${{ steps.plan.outputs.stack }}`**).
 
-            <details><summary>Show Plan (click)</summary>
+            <details><summary>Show Apply Output (click)</summary>
 
             ```terraform
             ${{ steps.apply.outputs.stdout }}
