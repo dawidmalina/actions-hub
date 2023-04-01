@@ -164,12 +164,6 @@ jobs:
       - name: Add Plan Comment
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: plan-comment
-        # uses: unsplash/comment-on-pr@v1.3.0
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # with:
-        #   check_for_duplicate_msg: false
-        #   msg: |
         uses: peter-evans/create-or-update-comment@v2
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -229,12 +223,11 @@ jobs:
       - name: Add Apply Comment
         if: github.event.pull_request.merged == true # && github.event.review.state == 'approved'
         id: apply-comment
-        uses: unsplash/comment-on-pr@v1.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: peter-evans/create-or-update-comment@v2
         with:
-          check_for_duplicate_msg: false
-          msg: |
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
             ### Terraform Apply Result
 
             - environment: **`${{ steps.init.outputs.environment }}`**
