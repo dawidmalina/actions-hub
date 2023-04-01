@@ -139,7 +139,7 @@ jobs:
 
           echo "cloud=$( echo ${{ matrix.dir }} |cut -d'/' -f1 )" >> "$GITHUB_OUTPUT"
           echo "environment=$( echo ${{ matrix.dir }} |cut -d'/' -f2 )" >> "$GITHUB_OUTPUT"
-          echo "stack=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
+          echo "region=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
 
           echo "summary<<EOF" >> $GITHUB_OUTPUT
           terraform show -no-color tfplan |grep -E 'Plan:|No changes' |sed '1{/^$/d}' >> $GITHUB_OUTPUT
@@ -171,7 +171,7 @@ jobs:
           msg: |
             ### Terraform Plan Result
 
-            :ship: Changes contained in this pull request result in the following changes in the **`${{ steps.plan.outputs.environment }}`** environment (stack **`${{ steps.plan.outputs.stack }}`**):
+            :ship: Changes contained in this pull request result in the following changes in the **`${{ steps.plan.outputs.environment }}`** environment (region **`${{ steps.plan.outputs.region }}`**):
 
             ```
             ${{ steps.plan.outputs.summary }}
@@ -227,7 +227,7 @@ jobs:
           msg: |
             ### Terraform Apply Result
 
-            :rocket: Changes has been applied in the **`${{ steps.plan.outputs.environment }}`** environment (stack **`${{ steps.plan.outputs.stack }}`**).
+            :rocket: Changes has been applied in the **`${{ steps.plan.outputs.environment }}`** environment (region **`${{ steps.plan.outputs.region }}`**).
 
             <details><summary>Show Apply Output (click)</summary>
 
