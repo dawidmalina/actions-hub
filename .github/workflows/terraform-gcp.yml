@@ -73,6 +73,13 @@ jobs:
       #     workload_identity_provider: <write what you got from terraform output>
       #     service_account: <write what you got from terrafrom output>
 
+      # - name: Configure GCP credentials
+      #   uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      #   with:
+      #     service_account_key: ${{ secrets.GCP_SA_KEY }}
+      #     project_id: <GCP_PROJECT_ID>
+      #     export_default_credentials: true
+
       # Install the preferred version of Terraform CLI
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2.0.3
@@ -102,6 +109,15 @@ jobs:
         with:
           soft_fail: true
 
+      # - name: Checkov security scan
+      #   if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
+      #   id: security
+      #   uses: bridgecrewio/checkov-action@master
+      #   with:
+      #     version: latest
+      #     directory: ./terraform
+      #     fail_on_violations: true
+
       - name: Terraform Validate
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
         id: validate
@@ -123,7 +139,7 @@ jobs:
 
           echo "cloud=$( echo ${{ matrix.dir }} |cut -d'/' -f1 )" >> "$GITHUB_OUTPUT"
           echo "environment=$( echo ${{ matrix.dir }} |cut -d'/' -f2 )" >> "$GITHUB_OUTPUT"
-          echo "project=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
+          echo "stack=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
 
           echo "summary<<EOF" >> $GITHUB_OUTPUT
           terraform show -no-color tfplan |grep -E 'Plan:|No changes' |sed '1{/^$/d}' >> $GITHUB_OUTPUT
@@ -147,37 +163,34 @@ jobs:
       - name: Add Plan Comment
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
         id: plan-comment
-        uses: actions/github-script@v6
+        uses: unsplash/comment-on-pr@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const output = `${{ steps.plan.outputs.cloud }} ${{ steps.plan.outputs.environment }} ${{ steps.plan.outputs.project }}\n
-            \`\`\`
-            ${{ steps.plan.outputs.summary }}
-            \`\`\`
-            #### Terraform Format and Style 🖌 \`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
-            #### Terraform Validation 🤖 \`${{ steps.validate.outcome }}\`
-            #### Terraform Security 🛡️ \`${{ steps.security.outcome }}\`
-            <details><summary>Validation Output</summary>\n
-            \`\`\`
-            ${{ steps.validate.outputs.stdout }}
-            \`\`\`
-            </details>\n
-            #### Terraform Plan 📖 \`${{ steps.plan.outcome }}\`
-            <details><summary>Show Plan</summary>\n
-            \`\`\`terraform
-            ${{ steps.plan.outputs.tf_plan }}
-            \`\`\`
-            </details>\n
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ matrix.dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+          msg: |
+            ### Terraform Plan Result
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
+            The changes contained in this pull request result in the following changes in the `${{ steps.plan.outputs.environment }}` environment (stack `${{ steps.plan.outputs.stack }}`):
+
+            ```
+            ${{ steps.plan.outputs.summary }}
+            ```
+
+            ### Quality Standard Report:
+
+            | Quality Check  | Status |
+            | ------------- | ------------- |
+            | Terraform Format and Style  | `${{ steps.fmt.outcome }}` |
+            | Terraform Initialization | `${{ steps.init.outcome }}` |
+            | Terraform Validation | `${{ steps.validate.outcome }}` |
+            | Terraform Security | `${{ steps.security.outcome }}` |
+            | Terraform Plan | `${{ steps.plan.outcome }}` |
+
+            <details><summary>Show Plan (click)</summary>
+            ```terraform
+            ${{ steps.plan.outputs.tf_plan }}
+            ```
+            </details>
+
+            *Pusher: @${{ github.actor }}, Action: `${{ github.event_name }}`, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.plan.outputs.cloud }}`*
 
       # Download saved plan from artifacts
       - name: Download Terraform Plan
@@ -200,21 +213,17 @@ jobs:
       - name: Add Apply Comment
         if: github.event.pull_request.merged == true && github.event.review.state == 'approved'
         id: apply-comment
-        uses: actions/github-script@v6
+        uses: unsplash/comment-on-pr@v1
         with:
-          script: |
-            const output = `#### Terraform Initialization ⚙️ \`${{ steps.init.outcome }}\`
-            #### Terraform Apply 📖 \`${{ steps.apply.outcome }}\`
-            <details><summary>Show Apply</summary>\n
-            \`\`\`\n
-            ${{ steps.apply.outputs.stdout }}
-            \`\`\`
-            </details>\n
-            *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ matrix.dir }}\`, Workflow: \`${{ github.workflow }}\`*`;
+          msg: |
+            ### Terraform Apply Result
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
+            :rocket: The changes has been applied in the `${{ steps.plan.outputs.environment }}` environment (stack `${{ steps.plan.outputs.stack }}`).
+
+            <details><summary>Show Plan (click)</summary>
+            ```terraform
+            ${{ steps.apply.outputs.stdout }}
+            ```
+            </details>
+
+            *Pusher: @${{ github.actor }}, Action: `${{ github.event_name }}`, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.plan.outputs.cloud }}`*
