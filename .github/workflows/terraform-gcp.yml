@@ -95,11 +95,16 @@ jobs:
 
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
+        if: always()
         id: init
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
           TF_VAR_project_id: ${{ inputs.project_id }}
         run: |
+          echo "cloud=$( echo ${{ matrix.dir }} |cut -d'/' -f1 )" >> "$GITHUB_OUTPUT"
+          echo "environment=$( echo ${{ matrix.dir }} |cut -d'/' -f2 )" >> "$GITHUB_OUTPUT"
+          echo "region=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
+
           terraform init
 
       - name: Terraform Security
@@ -137,10 +142,6 @@ jobs:
         run: |
           terraform plan -no-color -out tfplan
 
-          echo "cloud=$( echo ${{ matrix.dir }} |cut -d'/' -f1 )" >> "$GITHUB_OUTPUT"
-          echo "environment=$( echo ${{ matrix.dir }} |cut -d'/' -f2 )" >> "$GITHUB_OUTPUT"
-          echo "region=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
-
           echo "summary<<EOF" >> $GITHUB_OUTPUT
           terraform show -no-color tfplan |grep -E 'Plan:|No changes' |sed '1{/^$/d}' >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
@@ -171,7 +172,7 @@ jobs:
           msg: |
             ### Terraform Plan Result
 
-            :ship: Terraform changes contained in this pull request result in the following changes in the **`${{ steps.plan.outputs.environment }}`** environment (region **`${{ steps.plan.outputs.region }}`**):
+            :ship: Terraform changes contained in this pull request result in the following changes in the **`${{ steps.init.outputs.environment }}`** environment (region **`${{ steps.init.outputs.region }}`**):
 
             ```
             ${{ steps.plan.outputs.summary }}
@@ -194,7 +195,7 @@ jobs:
             ```
             </details>
 
-            *Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.plan.outputs.cloud }}`*
+            *Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.init.outputs.cloud }}`*
 
       # Download saved plan from artifacts
       - name: Download Terraform Plan
@@ -228,7 +229,7 @@ jobs:
           msg: |
             ### Terraform Apply Result
 
-            :rocket: Terraform changes has been applied!!!
+            :rocket: Terraform changes has been applied in the **`${{ steps.init.outputs.environment }}`** environment (region **`${{ steps.init.outputs.region }}`**)!!!
 
             <details><summary>Show Apply Output (click)</summary>
 
@@ -237,4 +238,4 @@ jobs:
             ```
             </details>
 
-            *Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`*
+            *Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.init.outputs.cloud }}`*
