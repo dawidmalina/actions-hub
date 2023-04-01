@@ -171,7 +171,7 @@ jobs:
           msg: |
             ### Terraform Plan Result
 
-            :ship: Changes contained in this pull request result in the following changes in the **`${{ steps.plan.outputs.environment }}`** environment (region **`${{ steps.plan.outputs.region }}`**):
+            :ship: Terraform changes contained in this pull request result in the following changes in the **`${{ steps.plan.outputs.environment }}`** environment (region **`${{ steps.plan.outputs.region }}`**):
 
             ```
             ${{ steps.plan.outputs.summary }}
@@ -228,7 +228,7 @@ jobs:
           msg: |
             ### Terraform Apply Result
 
-            :rocket: Changes has been applied in the **`${{ steps.plan.outputs.environment }}`** environment (region **`${{ steps.plan.outputs.region }}`**).
+            :rocket: Terraform changes has been applied!!!
 
             <details><summary>Show Apply Output (click)</summary>
 
