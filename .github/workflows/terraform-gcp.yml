@@ -161,7 +161,7 @@ jobs:
 
       # Add a comment to pull requests with plan results
       - name: Add Plan Comment
-        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed'
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: plan-comment
         uses: unsplash/comment-on-pr@v1.3.0
         env:
