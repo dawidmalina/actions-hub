@@ -164,12 +164,17 @@ jobs:
       - name: Add Plan Comment
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: plan-comment
-        uses: unsplash/comment-on-pr@v1.3.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # uses: unsplash/comment-on-pr@v1.3.0
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # with:
+        #   check_for_duplicate_msg: false
+        #   msg: |
+        uses: peter-evans/create-or-update-comment@v2
         with:
-          check_for_duplicate_msg: false
-          msg: |
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
             ### Terraform Plan Result
 
             - environment: **`${{ steps.init.outputs.environment }}`**
