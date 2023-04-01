@@ -81,6 +81,7 @@ jobs:
           terraform_wrapper: false
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
+      # Check if terraform code is formatted
       - name: Terraform Fmt
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: fmt
@@ -101,19 +102,16 @@ jobs:
 
           terraform init
 
+      # Security scan terraform code
       - name: Terraform Security
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: security
-        # uses: aquasecurity/tfsec-action@v1.0.0
-        # with:
-        #   working_directory: ${{ matrix.dir }}
-        #   soft_fail: false
-
         uses: bridgecrewio/checkov-action@v12
         with:
           directory: ${{ matrix.dir }}
           soft_fail: false
 
+      # Validate terraform code
       - name: Terraform Validate
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: validate
@@ -211,6 +209,7 @@ jobs:
         run: |
           terraform apply -auto-approve -input=false -no-color tfplan
 
+      # Add a comment to pull requests with apply results
       - name: Add Apply Comment
         if: github.event.pull_request.merged == true # && github.event.review.state == 'approved'
         id: apply-comment
