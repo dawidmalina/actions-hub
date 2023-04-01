@@ -194,7 +194,7 @@ jobs:
             ```
             </details>
 
-            *Pusher: @${{ github.actor }}, Action: `${{ github.event_name }}`, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.plan.outputs.cloud }}`*
+            *Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.plan.outputs.cloud }}`*
 
       # Download saved plan from artifacts
       - name: Download Terraform Plan
@@ -237,4 +237,4 @@ jobs:
             ```
             </details>
 
-            *Pusher: @${{ github.actor }}, Action: `${{ github.event_name }}`, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.plan.outputs.cloud }}`*
+            *Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`*
