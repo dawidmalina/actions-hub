@@ -205,6 +205,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           pr: ${{ github.event.pull_request.number }}
           name: tfplan
+          path: ${{ matrix.dir }}
 
       # On push to main, build or change infrastructure according to Terraform configuration files
       - name: Terraform Apply
