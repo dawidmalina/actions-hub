@@ -112,10 +112,12 @@ jobs:
         id: security
         # uses: aquasecurity/tfsec-action@v1.0.0
         # with:
+        #   working_directory: ${{ matrix.dir }}
         #   soft_fail: true
 
         uses: bridgecrewio/checkov-action@v12
         with:
+          directory: ${{ matrix.dir }}
           soft_fail: true
 
       - name: Terraform Validate
