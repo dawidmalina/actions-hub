@@ -74,7 +74,7 @@ jobs:
         id: auth
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: "${{ secrets[format('terraform-{0}-{1}-sa-key', inputs.product, steps.init.vars.environment)] }}"
+          credentials_json: "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.init.vars.environment)] }}"
 
       # Install the preferred version of Terraform CLI
       - name: Setup Terraform
