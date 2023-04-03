@@ -76,11 +76,11 @@ jobs:
           token=${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}
           echo "key=${token^^}" >> "$GITHUB_OUTPUT"
 
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets[steps.secrets.outputs.key] }}
+#       - name: Authenticate to Google Cloud
+#         id: auth
+#         uses: google-github-actions/auth@v1
+#         with:
+#           credentials_json: ${{ secrets[steps.secrets.outputs.key] }}
 
       # Install the preferred version of Terraform CLI
       - name: Setup Terraform
@@ -100,6 +100,8 @@ jobs:
       - name: Terraform Init
         if: always()
         id: init
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets[steps.secrets.outputs.key] }}
         run: |
           terraform init
 
@@ -108,6 +110,8 @@ jobs:
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: security
         uses: bridgecrewio/checkov-action@v12
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets[steps.secrets.outputs.key] }}
         with:
           directory: ${{ matrix.dir }}
           soft_fail: false
@@ -116,6 +120,8 @@ jobs:
       - name: Terraform Validate
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: validate
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets[steps.secrets.outputs.key] }}
         run: |
           terraform validate -no-color
 
@@ -123,6 +129,8 @@ jobs:
       - name: Terraform Plan
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: plan
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets[steps.secrets.outputs.key] }}
         run: |
           terraform plan -no-color -out tfplan
 
@@ -198,6 +206,8 @@ jobs:
       - name: Terraform Apply
         if: github.event.pull_request.merged == true # && github.event.review.state == 'approved'
         id: apply
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets[steps.secrets.outputs.key] }}
         run: |
           terraform apply -auto-approve -input=false -no-color tfplan
 
