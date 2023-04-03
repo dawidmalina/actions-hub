@@ -157,7 +157,7 @@ jobs:
             ### Terraform Plan Result
 
             - environment: **`${{ steps.vars.outputs.environment }}`**
-            - region: **`${{ steps.vars.outputs.region }}`**
+            - region (scope): **`${{ steps.vars.outputs.region }}`**
 
             :ship: Terraform code modifications included in this pull request result in the following changes:
 
@@ -214,7 +214,7 @@ jobs:
             ### Terraform Apply Result
 
             - environment: **`${{ steps.vars.outputs.environment }}`**
-            - region: **`${{ steps.vars.outputs.region }}`**
+            - region (scope): **`${{ steps.vars.outputs.region }}`**
 
             :rocket: Terraform code modifications contained in this pull request has been applied!!!
 
