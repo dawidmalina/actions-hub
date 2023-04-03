@@ -79,14 +79,11 @@ jobs:
           echo "TEST=${token^^}" >> "$GITHUB_ENV"
 
       - name: Test secrets
+        env:
+          TEST_1: ${{ secrets[steps.secrets.key] }}
+          TEST_2: ${{ secrets[env.TEST] }}
         run: |
-          token=${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}
-
-          env:
-            TEST_1: ${{ secrets[steps.secrets.key] }}
-            TEST_2: ${{ secrets[env.TEST] }}
-          run: |
-            printenv
+          printenv
 
 #       - name: Authenticate to Google Cloud
 #         id: auth
