@@ -74,12 +74,9 @@ jobs:
         id: secrets
         run: |
           token=${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}
-          
-          echo ${token}
-          echo ${token^^}
-          
-          echo ${${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}^^}
-          
+
+          echo "key_name=${token^^}"
+
           echo "key_name=${token^^}" >> "$GITHUB_OUTPUT"
 
       - name: Authenticate to Google Cloud
