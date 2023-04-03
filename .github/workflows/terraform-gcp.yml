@@ -70,33 +70,32 @@ jobs:
           echo "environment=$( echo ${{ matrix.dir }} |cut -d'/' -f2 )" >> "$GITHUB_OUTPUT"
           echo "region=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
 
-      - name: Expose secrets
-        id: secrets
-        run: |
-          token=${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}
-          echo "key=${token^^}" >> "$GITHUB_OUTPUT"
+#       - name: Expose secrets
+#         id: secrets
+#         run: |
+#           token=${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}
+#           echo "key=${token^^}" >> "$GITHUB_OUTPUT"
           
-          echo "TEST=${token^^}" >> "$GITHUB_ENV"
+#           echo "TEST=${token^^}" >> "$GITHUB_ENV"
           
-          echo "TEST_AAA=${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}" >> "$GITHUB_ENV"
+#           echo "TEST_AAA=${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}" >> "$GITHUB_ENV"
 
-      - name: Test secrets
-        env:
-          TEST_1: '${{ secrets[steps.secrets.key] }}'
-          TEST_2: '${{ secrets[env.TEST] }}'
-          TEST_3: '${{ secrets.TERRAFORM_ASTRATO_GLOBAL_SA_KEY }}'
-          TEST_4: '${{ secrets[env.TEST_AAA] }}'
-        run: |
-          printenv |grep TEST
+#       - name: Test secrets
+#         env:
+#           TEST_1: '${{ secrets[steps.secrets.key] }}'
+#           TEST_2: '${{ secrets[env.TEST] }}'
+#           TEST_4: '${{ secrets[env.TEST_AAA] }}'
+#         run: |
+#           printenv |grep TEST
           
-          echo "${{ secrets.TERRAFORM_ASTRATO_GLOBAL_SA_KEY }}"
-          echo "${{ secrets[env.TEST_AAA] }}"
+#           echo ${{ secrets.TERRAFORM_ASTRATO_GLOBAL_SA_KEY }} | sed 's/./& /g'
+#           echo ${{ secrets[env.TEST_AAA] }} | sed 's/./& /g'
 
-#       - name: Authenticate to Google Cloud
-#         id: auth
-#         uses: google-github-actions/auth@v1
-#         with:
-#           credentials_json: ${{ secrets[steps.secrets.outputs.key] }}
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment)] }}
 
       # Install the preferred version of Terraform CLI
       - name: Setup Terraform
