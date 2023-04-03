@@ -82,10 +82,10 @@ jobs:
 
       - name: Test secrets
         env:
-          TEST_1: ${{ secrets[steps.secrets.key] }}
-          TEST_2: ${{ secrets[env.TEST] }}
-          TEST_3: ${{ secrets.TERRAFORM_ASTRATO_GLOBAL_SA_KEY }}
-          TEST_4: ${{ secrets[env.TEST_AAA] }}
+          TEST_1: '${{ secrets[steps.secrets.key] }}'
+          TEST_2: '${{ secrets[env.TEST] }}'
+          TEST_3: '${{ secrets.TERRAFORM_ASTRATO_GLOBAL_SA_KEY }}'
+          TEST_4: '${{ secrets[env.TEST_AAA] }}'
         run: |
           printenv |grep TEST
 
