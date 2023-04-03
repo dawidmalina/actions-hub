@@ -74,16 +74,13 @@ jobs:
         id: secrets
         run: |
           token=${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}
-
-          echo "key_name=${token^^}"
-
-          echo "key_name=${token^^}" >> "$GITHUB_OUTPUT"
+          echo "key=${token^^}" >> "$GITHUB_OUTPUT"
 
       - name: Authenticate to Google Cloud
         id: auth
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: "${{ secrets[steps.secrets.outputs.key_name] }}"
+          credentials_json: ${{ secrets[steps.secrets.outputs.key] }}
 
       # Install the preferred version of Terraform CLI
       - name: Setup Terraform
