@@ -75,6 +75,7 @@ jobs:
         run: |          
           echo "${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}"
           echo "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment)] }}"
+          echo "${{ secrets['TERRAFORM_MALINA_PROD_SA_KEY'] }}"
 
       - name: Authenticate to Google Cloud
         id: auth
