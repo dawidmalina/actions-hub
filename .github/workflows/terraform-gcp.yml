@@ -82,8 +82,9 @@ jobs:
         env:
           TEST_1: ${{ secrets[steps.secrets.key] }}
           TEST_2: ${{ secrets[env.TEST] }}
+          TEST_3: ${{ secrets.TERRAFORM_ASTRATO_GLOBAL_SA_KEY }}
         run: |
-          printenv
+          printenv |grep TEST
 
 #       - name: Authenticate to Google Cloud
 #         id: auth
