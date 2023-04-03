@@ -70,18 +70,21 @@ jobs:
           echo "environment=$( echo ${{ matrix.dir }} |cut -d'/' -f2 )" >> "$GITHUB_OUTPUT"
           echo "region=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
 
-      - name: Dynamic secrets
+      - name: Expose secrets
         id: secrets
-        run: |          
-          echo "${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}"
-          echo "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment)] }}"
-          echo "${{ secrets['TERRAFORM_MALINA_PROD_SA_KEY'] }}"
+        run: |
+          token = ${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}
+          
+          echo ${token}
+          echo ${token^^}
+          
+          echo "key_name=${key^^}" >> "$GITHUB_OUTPUT"
 
       - name: Authenticate to Google Cloud
         id: auth
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment)] }}"
+          credentials_json: "${{ secrets[steps.secrets.outputs.key_name] }}"
 
       # Install the preferred version of Terraform CLI
       - name: Setup Terraform
