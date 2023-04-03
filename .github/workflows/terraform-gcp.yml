@@ -69,6 +69,9 @@ jobs:
           echo "cloud=$( echo ${{ matrix.dir }} |cut -d'/' -f1 )" >> "$GITHUB_OUTPUT"
           echo "environment=$( echo ${{ matrix.dir }} |cut -d'/' -f2 )" >> "$GITHUB_OUTPUT"
           echo "region=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
+          
+          echo "${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.init.vars.environment) }}"
+          echo "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.init.vars.environment)] }}"
 
       - name: Authenticate to Google Cloud
         id: auth
