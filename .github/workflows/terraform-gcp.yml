@@ -73,14 +73,14 @@ jobs:
       - name: Dynamic secrets
         id: secrets
         run: |          
-          echo "${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.environment) }}"
-          echo "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.environment)] }}"
+          echo "${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment) }}"
+          echo "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment)] }}"
 
       - name: Authenticate to Google Cloud
         id: auth
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.environment)] }}"
+          credentials_json: "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment)] }}"
 
       # Install the preferred version of Terraform CLI
       - name: Setup Terraform
@@ -155,8 +155,8 @@ jobs:
           body: |
             ### Terraform Plan Result
 
-            - environment: **`${{ steps.init.vars.environment }}`**
-            - region: **`${{ steps.init.vars.region }}`**
+            - environment: **`${{ steps.vars.outputs.environment }}`**
+            - region: **`${{ steps.vars.outputs.region }}`**
 
             :ship: Terraform code modifications included in this pull request result in the following changes:
 
@@ -181,7 +181,7 @@ jobs:
             ```
             </details>
 
-            *Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.init.vars.cloud }}`*
+            *Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.vars.outputs.cloud }}`*
 
       # Download saved plan from artifacts
       - name: Download Terraform Plan
@@ -212,8 +212,8 @@ jobs:
           body: |
             ### Terraform Apply Result
 
-            - environment: **`${{ steps.init.vars.environment }}`**
-            - region: **`${{ steps.init.vars.region }}`**
+            - environment: **`${{ steps.vars.outputs.environment }}`**
+            - region: **`${{ steps.vars.outputs.region }}`**
 
             :rocket: Terraform code modifications contained in this pull request has been applied!!!
 
@@ -224,4 +224,4 @@ jobs:
             ```
             </details>
 
-            *Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.init.vars.cloud }}`*
+            *Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.vars.outputs.cloud }}`*
