@@ -110,8 +110,6 @@ jobs:
         if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
         id: security
         uses: bridgecrewio/checkov-action@v12
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets[steps.secrets.outputs.key] }}
         with:
           directory: ${{ matrix.dir }}
           soft_fail: false
