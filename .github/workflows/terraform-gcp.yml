@@ -73,14 +73,14 @@ jobs:
       - name: Dynamic secrets
         id: secrets
         run: |          
-          echo "${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.init.vars.environment) }}"
-          echo "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.init.vars.environment)] }}"
+          echo "${{ format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.environment) }}"
+          echo "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.environment)] }}"
 
       - name: Authenticate to Google Cloud
         id: auth
         uses: google-github-actions/auth@v1
         with:
-          credentials_json: "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.init.vars.environment)] }}"
+          credentials_json: "${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.environment)] }}"
 
       # Install the preferred version of Terraform CLI
       - name: Setup Terraform
