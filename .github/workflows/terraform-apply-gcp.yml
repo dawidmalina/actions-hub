@@ -108,7 +108,7 @@ jobs:
         id: apply
         run: |
           echo "tf_apply<<EOF" >> $GITHUB_OUTPUT
-          terraform apply -auto-approve -input=false -no-color >> $GITHUB_OUTPUT
+          terraform apply -auto-approve -input=false -no-color |sed '1{/^$/d}'  >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Post to a Slack channel
