@@ -35,7 +35,7 @@ jobs:
       - name: debuger
         run: |
             echo ${{ needs.prepare.outputs.all_changed_files }}
-            echo ${{ fromJson(needs.prepare.outputs.all_changed_files) }}
+            # echo ${{ fromJson(needs.prepare.outputs.all_changed_files) }}
 
     outputs:
       all_changed_files: ${{ fromJson(needs.prepare.outputs.all_changed_files) }}
