@@ -27,10 +27,10 @@ jobs:
         run: |
           pwd
           list=$( echo $( ls -d */*/* ) |sed 's/ /", "/g'  )
-          echo "all_changed_files='[\"${list}\"]'"
+          echo "all_changed_files=[\"${list}\"]"
 
           # '["push", "pull_request"]'
-          echo "all_changed_files='[\"${list}\"]'" >> "$GITHUB_OUTPUT"
+          echo "all_changed_files=[\"${list}\"]" >> "$GITHUB_OUTPUT"
           
       - name: debuger
         run: |
