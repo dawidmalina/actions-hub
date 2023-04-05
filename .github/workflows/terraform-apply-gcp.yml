@@ -101,8 +101,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         id: apply
         run: |
-          echo $PWD
           # terraform apply -auto-approve -input=false -no-color
-          # echo "tf_apply<<EOF" >> $GITHUB_OUTPUT
-          # terraform apply -auto-approve -input=false -no-color >> $GITHUB_OUTPUT
-          # echo "EOF" >> $GITHUB_OUTPUT
+          echo "tf_apply<<EOF" >> $GITHUB_OUTPUT
+          terraform apply -auto-approve -input=false -no-color >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
