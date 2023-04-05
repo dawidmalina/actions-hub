@@ -34,8 +34,8 @@ jobs:
           
       - name: debuger
         run: |
-            echo ${{ steps.prepare.outputs.all_changed_files }}
-            echo ${{ fromJson(steps.prepare.outputs.all_changed_files) }}
+            echo ${{ steps.changes-as-json.outputs.all_changed_files }}
+            echo ${{ fromJson(steps.changes-as-json.outputs.all_changed_files) }}
 
     outputs:
       all_changed_files: ${{ steps.changes-as-json.outputs.all_changed_files }}
