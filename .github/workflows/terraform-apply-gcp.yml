@@ -34,9 +34,11 @@ jobs:
           if [ -d "${{ inputs.project_path }}" ]; then
               echo "Directory ${{ inputs.project_path }} exists."
               echo "all_changed_files=[\"${{ inputs.project_path }}\"]" >> "$GITHUB_OUTPUT"
+              echo "any_changed=true" >> "$GITHUB_OUTPUT"
           else
               echo "Warnining: Directory ${{ inputs.project_path }} does not exists."
               echo "all_changed_files=[]" >> "$GITHUB_OUTPUT"
+              echo "any_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
           # all
@@ -44,9 +46,11 @@ jobs:
           # echo "all_changed_files=[\"${list}\"]" >> "$GITHUB_OUTPUT"
     outputs:
       all_changed_files: ${{ steps.changes-as-json.outputs.all_changed_files }}
+      any_changed: ${{ steps.changes-as-json.outputs.any_changed }}
 
   terraform:
     name: apply
+    if: needs.prepare.outputs.any_changed == 'true'
     runs-on: ubuntu-latest
     needs: prepare
     strategy:
