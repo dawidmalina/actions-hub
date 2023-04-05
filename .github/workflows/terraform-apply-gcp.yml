@@ -26,9 +26,9 @@ jobs:
         id: changes-as-json
         run: |
           pwd
-          list=$( echo $( ls -d */*/* ) |sed "s/ /','/g"  )
+          list=$( echo $( ls -d */*/* ) |sed "s/ /\\',\\'/g"  )
           echo ${list}
-          echo "all_changed_files=['${list}']"
+          echo "all_changed_files='[\'${list}\']'"
           echo "all_changed_files=['${list}']" >> "$GITHUB_OUTPUT"
 
     outputs:
