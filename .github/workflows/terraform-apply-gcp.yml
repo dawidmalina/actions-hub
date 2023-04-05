@@ -29,6 +29,7 @@ jobs:
       - name: Get all environments(s)
         id: changes-as-json
         run: |
+          echo $( ls -d */*/* )
           [ -d "${{ inputs.project_path }}" ] || echo "Directory ${{ inputs.project_path }} DOES NOT exists." && exit 1
           echo "all_changed_files=[\"${{ inputs.project_path }}\"]" >> "$GITHUB_OUTPUT"
           # all
