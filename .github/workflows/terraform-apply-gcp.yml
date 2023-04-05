@@ -31,6 +31,11 @@ jobs:
 
           # '["push", "pull_request"]'
           echo "all_changed_files='[\"${list}\"]'" >> "$GITHUB_OUTPUT"
+          
+      - name: debuger
+        run: |
+            echo ${{ needs.prepare.outputs.all_changed_files }}
+            echo ${{ fromJson(needs.prepare.outputs.all_changed_files) }}
 
     outputs:
       all_changed_files: ${{ fromJson(needs.prepare.outputs.all_changed_files) }}
