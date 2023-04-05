@@ -26,13 +26,13 @@ jobs:
         id: changes-as-json
         run: |
           pwd
-          list=$( echo $( ls -d */*/* ) |tr ' ' ','  )
+          list=$( echo $( ls -d */*/* ) |sed 's/ /","/g'  )
           echo ${list}
-          echo "all_changed_files=[${list}]"
-          echo "all_changed_files=[${list}]" >> "$GITHUB_OUTPUT"
+          echo "all_changed_files=[\"${list}\"]"
+          echo "all_changed_files=[\"${list}\"]" >> "$GITHUB_OUTPUT"
 
     outputs:
-      all_changed_files: ${{ steps.changes-as-json.outputs.all_changed_files }}
+      all_changed_files: ${{ fromJson(needs.prepare.outputs.all_changed_files) }}
 
   terraform:
     name: apply
