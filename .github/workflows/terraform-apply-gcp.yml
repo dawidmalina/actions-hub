@@ -113,9 +113,11 @@ jobs:
           # For posting a simple plain text message
           slack-message: |
             *Terraform Apply Result*
+            
+            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-            * environment: **`${{ steps.vars.outputs.environment }}`**
-            * project (region): **`${{ steps.vars.outputs.project }}`**
+            * environment: *`${{ steps.vars.outputs.environment }}`*
+            * project (region): *`${{ steps.vars.outputs.project }}`*
 
             :rocket: Terraform code modifications contained in this pull request has been applied!!!
 
