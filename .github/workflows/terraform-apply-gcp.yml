@@ -101,8 +101,15 @@ jobs:
         if: github.ref == 'refs/heads/main'
         id: apply
         run: |
-          # terraform apply -auto-approve -input=false -no-color
           echo "tf_apply<<EOF" >> $GITHUB_OUTPUT
+          terraform apply -auto-approve -input=false -no-color >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Generate Message
+        id: message
+        run: |
+          # terraform apply -auto-approve -input=false -no-color
+          echo "message<<EOF" >> $GITHUB_OUTPUT
           echo "*Terraform Apply Result*
 
           * environment: **`${{ steps.vars.outputs.environment }}`**
@@ -118,10 +125,10 @@ jobs:
 
           terraform apply -auto-approve -input=false -no-color >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
-          
+
       - name: Notify slack
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
         uses: abinoda/slack-action@v1.0.9
         with:
-          args: '{\"channel\":\"U04NWLG0PJL\",\"text\":\"Hello world\"}'
+          args: '{\"channel\":\"U04NWLG0PJL\",\"text\":\"${{ steps.message.outputs.message }}\"}'
