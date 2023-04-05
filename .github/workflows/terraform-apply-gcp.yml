@@ -30,8 +30,15 @@ jobs:
         id: changes-as-json
         run: |
           echo $( ls -d */*/* )
-          [ -d "${{ inputs.project_path }}" ] || echo "Directory ${{ inputs.project_path }} DOES NOT exists." && exit 1
-          echo "all_changed_files=[\"${{ inputs.project_path }}\"]" >> "$GITHUB_OUTPUT"
+
+          if [ -d "${{ inputs.project_path }}" ]; then
+              echo "Directory ${{ inputs.project_path }} exists."
+              echo "all_changed_files=[\"${{ inputs.project_path }}\"]" >> "$GITHUB_OUTPUT"
+          else
+              echo "Warnining: Directory ${{ inputs.project_path }} does not exists."
+              echo "all_changed_files=[]" >> "$GITHUB_OUTPUT"
+          fi
+
           # all
           # list=$( echo $( ls -d */*/* ) |sed 's/ /", "/g'  )
           # echo "all_changed_files=[\"${list}\"]" >> "$GITHUB_OUTPUT"
