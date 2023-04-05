@@ -8,6 +8,11 @@ on:
         description: "Define product name"
         required: true
         type: string
+      slack_channel:
+        description: "Define product name"
+        default: "G01M6MYAQ2K" # #cs-notifications
+        required: false
+        type: string
 
 env:
   # remember to change in all terraform* files
@@ -109,7 +114,7 @@ jobs:
         if: ${{ steps.plan.outcome != 'success' }}
         uses: slackapi/slack-github-action@v1.23.0
         with:
-          channel-id: 'U04NWLG0PJL' # #cs-notifications
+          channel-id: "${{ inputs.slack_channel }}"
           # For posting a simple plain text message
           slack-message: |
             *Terraform Drift Result*
