@@ -103,7 +103,12 @@ jobs:
         id: plan
         continue-on-error: true
         run: |
-          terraform plan -no-color -lock=false -detailed-exitcode -compact-warnings -out tfplan
+          # terraform plan -no-color -lock=false -detailed-exitcode -compact-warnings -out tfplan
+
+          export exitcode=0
+          terraform plan -detailed-exitcode -no-color -out tfplan || export exitcode=$?
+        
+          echo "exitcode=$exitcode" >> $GITHUB_OUTPUT
 
           echo "tf_plan<<EOF" >> $GITHUB_OUTPUT
           terraform show -no-color tfplan | sed '1{/^$/d}' >> $GITHUB_OUTPUT
