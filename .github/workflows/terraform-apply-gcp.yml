@@ -31,12 +31,6 @@ jobs:
 
           # '["push", "pull_request"]'
           echo "all_changed_files=[\"${list}\"]" >> "$GITHUB_OUTPUT"
-          
-      - name: debuger
-        run: |
-            echo ${{ steps.changes-as-json.outputs.all_changed_files }}
-            echo ${{ fromJson(steps.changes-as-json.outputs.all_changed_files) }}
-
     outputs:
       all_changed_files: ${{ steps.changes-as-json.outputs.all_changed_files }}
 
@@ -83,11 +77,11 @@ jobs:
           echo "environment=$( echo ${{ matrix.dir }} |cut -d'/' -f2 )" >> "$GITHUB_OUTPUT"
           echo "project=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
 
-      - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@v1
-        with:
-          credentials_json: ${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment)] }}
+#       - name: Authenticate to Google Cloud
+#         id: auth
+#         uses: google-github-actions/auth@v1
+#         with:
+#           credentials_json: ${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment)] }}
 
       # Install the preferred version of Terraform CLI
       - name: Setup Terraform
