@@ -26,10 +26,11 @@ jobs:
         id: changes-as-json
         run: |
           pwd
-          list=$( echo $( ls -d */*/* ) |sed "s/ /\\\',\\\'/g"  )
-          echo ${list}
-          echo "all_changed_files='[\'${list}\']'"
-          echo "all_changed_files='[\'${list}\']'" >> "$GITHUB_OUTPUT"
+          list=$( echo $( ls -d */*/* ) |sed 's/ /", "/g'  )
+          echo "all_changed_files='[\"${list}\"]'"
+
+          # '["push", "pull_request"]'
+          echo "all_changed_files='[\"${list}\"]'" >> "$GITHUB_OUTPUT"
 
     outputs:
       all_changed_files: ${{ fromJson(needs.prepare.outputs.all_changed_files) }}
