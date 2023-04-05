@@ -116,7 +116,7 @@ jobs:
 
       - name: Post to a Slack channel
         id: slack
-        if: ${{ steps.plan.outcome != 'success' }}
+        if: ${{ steps.plan.outputs.exitcode > 0 }}
         uses: slackapi/slack-github-action@v1.23.0
         with:
           channel-id: "${{ inputs.slack_channel }}"
