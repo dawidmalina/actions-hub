@@ -25,7 +25,10 @@ jobs:
       - name: Get all environments(s)
         id: changes-as-json
         run: |
+          pwd
           list=$( echo $( ls -d */*/* ) |tr ' ' ','  )
+          echo ${list}
+          echo "all_changed_files=[${list}]"
           echo "all_changed_files=[${list}]" >> "$GITHUB_OUTPUT"
 
     outputs:
