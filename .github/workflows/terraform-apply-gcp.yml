@@ -105,30 +105,24 @@ jobs:
           terraform apply -auto-approve -input=false -no-color >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Generate Message
-        id: message
-        run: |
-          # terraform apply -auto-approve -input=false -no-color
-          echo "message<<EOF" >> $GITHUB_OUTPUT
-          echo "*Terraform Apply Result*
+      - name: Post to a Slack channel
+        id: slack
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: 'U04NWLG0PJL'
+          # For posting a simple plain text message
+          slack-message: |
+            *Terraform Apply Result*
 
-          * environment: **`${{ steps.vars.outputs.environment }}`**
-          * project (region): **`${{ steps.vars.outputs.project }}`**
+            * environment: **`${{ steps.vars.outputs.environment }}`**
+            * project (region): **`${{ steps.vars.outputs.project }}`**
 
-          :rocket: Terraform code modifications contained in this pull request has been applied!!!
+            :rocket: Terraform code modifications contained in this pull request has been applied!!!
 
-          ```
-          ${{ steps.apply.outputs.tf_apply }}
-          ```
+            ```
+            ${{ steps.apply.outputs.tf_apply }}
+            ```
 
-          _Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.vars.outputs.cloud }}`_" >> $GITHUB_OUTPUT
-
-          terraform apply -auto-approve -input=false -no-color >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Notify slack
+            _Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.vars.outputs.cloud }}`_
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-        uses: abinoda/slack-action@v1.0.9
-        with:
-          args: '{\"channel\":\"U04NWLG0PJL\",\"text\":\"${{ steps.message.outputs.message }}\"}'
