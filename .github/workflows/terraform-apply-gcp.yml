@@ -103,6 +103,19 @@ jobs:
         run: |
           # terraform apply -auto-approve -input=false -no-color
           echo "tf_apply<<EOF" >> $GITHUB_OUTPUT
+          echo "*Terraform Apply Result*
+
+          * environment: **`${{ steps.vars.outputs.environment }}`**
+          * project (region): **`${{ steps.vars.outputs.project }}`**
+
+          :rocket: Terraform code modifications contained in this pull request has been applied!!!
+
+          ```
+          ${{ steps.apply.outputs.tf_apply }}
+          ```
+
+          _Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.vars.outputs.cloud }}`_" >> $GITHUB_OUTPUT
+
           terraform apply -auto-approve -input=false -no-color >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
           
