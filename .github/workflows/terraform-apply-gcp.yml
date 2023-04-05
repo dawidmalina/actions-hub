@@ -38,7 +38,7 @@ jobs:
             echo ${{ fromJson(steps.prepare.outputs.all_changed_files) }}
 
     outputs:
-      all_changed_files: ${{ fromJson(needs.prepare.outputs.all_changed_files) }}
+      all_changed_files: ${{ steps.changes-as-json.outputs.all_changed_files }}
 
   terraform:
     name: apply
@@ -51,7 +51,7 @@ jobs:
     needs: prepare
     strategy:
       matrix:
-        dir: ${{ needs.prepare.outputs.all_changed_files }}
+        dir: ${{ fromJson(needs.prepare.outputs.all_changed_files) }}
 
     # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
     # Set the working directory to main for the config files
