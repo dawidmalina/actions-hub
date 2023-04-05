@@ -1,0 +1,104 @@
+name: Terraform Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      product:
+        description: "Define product name"
+        required: true
+        type: string
+
+env:
+  # remember to change in all terraform* files
+  TERRAFORM_VERSION: 1.4.3
+
+jobs:
+  prepare:
+    name: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Get all environments(s)
+        id: changes-as-json
+        run: |
+          list=$( echo $( ls -d */*/* ) |tr ' ' ','  )
+          echo "all_changed_files=[${list}]" >> "$GITHUB_OUTPUT"
+
+    outputs:
+      all_changed_files: ${{ steps.changes-as-json.outputs.all_changed_files }}
+
+  terraform:
+    name: apply
+    runs-on: ubuntu-latest
+    # permissions:
+    #   contents: read
+    #   id-token: write
+    #   pull-requests: write
+    #   actions: read
+    needs: prepare
+    strategy:
+      matrix:
+        dir: ${{ fromJson(needs.prepare.outputs.all_changed_files) }}
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    # Set the working directory to main for the config files
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ matrix.dir }}
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 1
+
+      # TODO maybe switch to this approach
+      # - id: auth
+      #   name: Authenticate to Google Cloud
+      #   uses: google-github-actions/auth@v1
+      #   with:
+      #     create_credentials_file: true
+      #     workload_identity_provider: <write what you got from terraform output>
+      #     service_account: <write what you got from terraform output>
+      - name: Expose variables
+        id: vars
+        run: |
+          echo "cloud=$( echo ${{ matrix.dir }} |cut -d'/' -f1 )" >> "$GITHUB_OUTPUT"
+          echo "environment=$( echo ${{ matrix.dir }} |cut -d'/' -f2 )" >> "$GITHUB_OUTPUT"
+          echo "project=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets[format('terraform_{0}_{1}_sa_key', inputs.product, steps.vars.outputs.environment)] }}
+
+      # Install the preferred version of Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2.0.3
+        with:
+          terraform_wrapper: false
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Terraform Init
+        id: init
+        run: |
+          terraform init
+
+      # Only run on the `main` branch
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        id: apply
+        run: |
+          echo $PWD
+          # terraform apply -auto-approve -input=false -no-color
+          # echo "tf_apply<<EOF" >> $GITHUB_OUTPUT
+          # terraform apply -auto-approve -input=false -no-color >> $GITHUB_OUTPUT
+          # echo "EOF" >> $GITHUB_OUTPUT
