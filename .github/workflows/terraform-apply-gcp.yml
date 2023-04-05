@@ -29,12 +29,11 @@ jobs:
       - name: Get all environments(s)
         id: changes-as-json
         run: |
-          echo ${{ inputs.project_path }}
-          list=$( echo $( ls -d */*/* ) |sed 's/ /", "/g'  )
-          echo "all_changed_files=[\"${list}\"]"
-
-          # '["push", "pull_request"]'
-          echo "all_changed_files=[\"${list}\"]" >> "$GITHUB_OUTPUT"
+          [ -d "${{ inputs.project_path }}" ] || echo "Directory ${{ inputs.project_path }} DOES NOT exists." && exit 1
+          echo "all_changed_files=[\"${{ inputs.project_path }}\"]" >> "$GITHUB_OUTPUT"
+          # all
+          # list=$( echo $( ls -d */*/* ) |sed 's/ /", "/g'  )
+          # echo "all_changed_files=[\"${list}\"]" >> "$GITHUB_OUTPUT"
     outputs:
       all_changed_files: ${{ steps.changes-as-json.outputs.all_changed_files }}
 
