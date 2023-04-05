@@ -112,11 +112,9 @@ jobs:
           slack-message: |
             *Terraform Apply Result*
             
-            ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
             - environment: *`${{ steps.vars.outputs.environment }}`*
             - project (region): *`${{ steps.vars.outputs.project }}`*
-            - execution: [link](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - execution: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
             :rocket: Terraform code modifications contained in this pull request has been applied!!!
 
@@ -124,6 +122,6 @@ jobs:
             ${{ steps.apply.outputs.tf_apply }}
             ```
 
-            _Pusher: @${{ github.actor }}, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.vars.outputs.cloud }}`_
+            _Pusher: `@${{ github.actor }}`, Working Directory: `${{ matrix.dir }}`, Cloud Provider: `${{ steps.vars.outputs.cloud }}`_
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
