@@ -15,37 +15,42 @@ inputs:
     description: "Maximum depth of directories to output. e.g `test/test1/test2` with max depth of `2` returns `test/test1`."
     required: false
     default: "2"
+  base_sha:
+    description: "Specify a different base commit SHA used for comparing changes"
+    required: false
 
 outputs:
-  all_changed_files:
+  all_modified_files:
     description: "Returns all changed files i.e. *a combination of all added, copied, modified and renamed files (ACMR)*"
-    value: ${{ steps.set-values.outputs.all_changed_files }}
-  any_changed:
+    value: ${{ steps.set-values.outputs.all_modified_files }}
+  any_modified:
     description: "Returns `true` when any of the filenames provided using the `files` input has changed. If no `files` have been specified,an empty string `''` is returned. i.e. *using a combination of all added, copied, modified and renamed files (ACMR)*."
-    value: ${{ steps.set-values.outputs.any_changed }}
+    value: ${{ steps.set-values.outputs.any_modified }}
 
 runs:
   using: "composite"
   steps:
-    - uses: tj-actions/changed-files@v35
+    - uses: tj-actions/changed-files@v37
       id: changed-directories-as-json
       with:
         json: "true"
         dir_names: "true"
         dir_names_max_depth: ${{ inputs.dir_names_max_depth }}
-        dir_names_exclude_root: "true"
+        dir_names_exclude_current_dir: "true"
         files: ${{ inputs.files }}
         files_ignore: ${{ inputs.files_ignore }}
+        base_sha: ${{ inputs.base_sha }}
+
     - name: List all changed dir(s)
       id: set-values
       shell: bash
       run: |
         # debug
-        echo all_changed_files=${{ steps.changed-directories-as-json.outputs.all_changed_files }}
-        echo any_changed=${{ steps.changed-directories-as-json.outputs.any_changed }}
+        echo all_modified_files=${{ steps.changed-directories-as-json.outputs.all_modified_files }}
+        echo any_modified=${{ steps.changed-directories-as-json.outputs.any_modified }}
 
-        echo all_changed_files=${{ steps.changed-directories-as-json.outputs.all_changed_files }} >> $GITHUB_OUTPUT
-        echo any_changed=${{ steps.changed-directories-as-json.outputs.any_changed }} >> $GITHUB_OUTPUT
+        echo all_modified_files=${{ steps.changed-directories-as-json.outputs.all_modified_files }} >> $GITHUB_OUTPUT
+        echo any_modified=${{ steps.changed-directories-as-json.outputs.any_modified }} >> $GITHUB_OUTPUT
 
 branding:
   icon: file-text
