@@ -1,0 +1,259 @@
+name: Terraform
+
+on:
+  # define reusable section
+  workflow_call:
+
+env:
+  # renovate: datasource=github-releases depName=hashicorp/terraform extractVersion=^v(?<version>.*)$
+  TERRAFORM_VERSION: 1.5.4
+  # define amount of parallelism
+  TF_CLI_ARGS_plan: -parallelism=30
+  TF_CLI_ARGS_apply: -parallelism=30
+  # Use the same ssh-agent socket value across all jobs
+  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+
+jobs:
+  prepare:
+    name: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Get changed environments(s)
+        id: changes-as-json
+        uses: dawidmalina/actions-hub/wrapped-changed-directories@main
+        with:
+          base_sha: ${{ github.event.pull_request.base.sha }}
+          dir_names_max_depth: "3"
+          files: |
+            **/*.tf
+            **/*.tfvars
+    outputs:
+      all_modified_files: ${{ steps.changes-as-json.outputs.all_modified_files }}
+      any_modified: ${{ steps.changes-as-json.outputs.any_modified }}
+
+  terraform:
+    name: plan-apply
+    if: needs.prepare.outputs.any_modified == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+      actions: read
+    needs: prepare
+    strategy:
+      matrix:
+        dir: ${{ fromJson(needs.prepare.outputs.all_modified_files) }}
+
+    # Use the Bash shell regardless whether the GitHub Actions runner is ubuntu-latest, macos-latest, or windows-latest
+    # Set the working directory to main for the config files
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ matrix.dir }}
+
+    steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Expose variables
+        id: vars
+        run: |
+          echo "environment=$( echo ${{ matrix.dir }} |cut -d'/' -f2 )" >> "$GITHUB_OUTPUT"
+          echo "region=$( echo ${{ matrix.dir }} |cut -d'/' -f3 )" >> "$GITHUB_OUTPUT"
+
+      - name: Authentication to AWS
+        id: auth_aws
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets[format('TERRAFORM_{0}_ACCESS_KEY_ID', steps.vars.outputs.environment )] }}
+          aws-secret-access-key: ${{ secrets[format('TERRAFORM_{0}_SECRET_ACCESS_KEY', steps.vars.outputs.environment )] }}
+          aws-region: ${{ steps.vars.outputs.region }}
+
+      # Install the preferred version of Terraform CLI
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2.0.3
+        with:
+          terraform_wrapper: false
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v3
+
+      # Pre commit setup and check configured checks
+      - name: Pre-Commit
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
+        id: pre
+        uses: pre-commit/action@v3.0.0
+
+      # Check if terraform code is formatted
+      - name: Terraform Fmt
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
+        id: fmt
+        run: |
+          terraform fmt -check -diff
+
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Terraform Init
+        if: always()
+        id: init
+        run: |
+          terraform init
+
+      - name: Run TFLint
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
+        id: tflint
+        env:
+          # https://github.com/terraform-linters/tflint/blob/master/docs/user-guide/plugins.md#avoiding-rate-limiting
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          tflint --init --config "${{ github.workspace }}/.tflint.hcl"
+          tflint -f compact --config "${{ github.workspace }}/.tflint.hcl"
+
+      # Security scan terraform code
+      - name: Terraform Security
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
+        id: security
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: ${{ matrix.dir }}
+          soft_fail: false
+          download_external_modules: true
+          skip_check: CKV_TF_1
+
+      # Validate terraform code
+      - name: Terraform Validate
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
+        id: validate
+        run: |
+          terraform validate -no-color
+
+      # Run a terraform plan for pull requests only
+      - name: Terraform Plan
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
+        id: plan
+        run: |
+          terraform plan -no-color -out tfplan
+
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          (terraform show -no-color tfplan |grep -E 'Plan:|No changes' || terraform show -no-color tfplan) >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          echo "tf_plan<<EOF" >> $GITHUB_OUTPUT
+          terraform show -no-color tfplan | sed '1{/^$/d}' >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      # Save plan to artifacts
+      - name: Save Plan
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
+        id: save-plan
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ format('tfplan-{0}-{1}-{2}-pr{3}', steps.vars.outputs.cloud, steps.vars.outputs.environment, steps.vars.outputs.region, github.event.pull_request.number) }}
+          path: ${{ matrix.dir }}/tfplan
+          # if-no-files-found: ignore
+
+      # Add a comment to pull requests with plan results
+      - name: Find Comment
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
+        id: find-comment
+        uses: peter-evans/find-comment@v2
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: |
+            ### Terraform Plan Result
+
+            - environment: **`${{ steps.vars.outputs.environment }}`**
+            - project (region): **`${{ steps.vars.outputs.region }}`**
+
+      - name: Add Plan Comment
+        if: github.event.pull_request.merged != true && github.event.pull_request.state != 'closed' || failure()
+        id: plan-comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          comment-id: ${{ steps.find-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.pull_request.number }}
+          edit-mode: replace
+          body: |
+            ### Terraform Plan Result
+
+            - environment: **`${{ steps.vars.outputs.environment }}`**
+            - project (region): **`${{ steps.vars.outputs.region }}`**
+
+            :ship: Terraform code modifications included in this pull request result in the following changes:
+
+            ```
+            ${{ steps.plan.outputs.summary }}
+            ```
+
+            ### Quality Standard Report:
+
+            | Quality Check  | Status |
+            | ------------- | ------------- |
+            | Pre-Commit | **`${{ steps.pre.outcome }}`** |
+            | Terraform Linter | **`${{ steps.tflint.outcome }}`** |
+            | Terraform Format and Style  | **`${{ steps.fmt.outcome }}`** |
+            | Terraform Initialization | **`${{ steps.init.outcome }}`** |
+            | Terraform Validation | **`${{ steps.validate.outcome }}`** |
+            | Terraform Security | **`${{ steps.security.outcome }}`** |
+            | Terraform Plan | **`${{ steps.plan.outcome }}`** |
+
+            <details><summary>Show Plan (click)</summary>
+
+            ```terraform
+            ${{ steps.plan.outputs.tf_plan }}
+            ```
+            </details>
+
+            *Pusher: **@${{ github.actor }}**, Working Directory: **`${{ matrix.dir }}`**, Cloud Provider: **`${{ steps.vars.outputs.cloud }}`***
+
+      # Download saved plan from artifacts
+      - name: Download Terraform Plan
+        if: github.event.pull_request.merged == true
+        id: download-plan
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          pr: ${{ github.event.pull_request.number }}
+          name: ${{ format('tfplan-{0}-{1}-{2}-pr{3}', steps.vars.outputs.cloud, steps.vars.outputs.environment, steps.vars.outputs.region, github.event.pull_request.number) }}
+          path: ${{ matrix.dir }}
+
+      # On push to main, build or change infrastructure according to Terraform configuration files
+      - name: Terraform Apply
+        if: github.event.pull_request.merged == true
+        id: apply
+        run: |
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          (terraform show -no-color tfplan |grep -E 'Plan:|No changes' || terraform show -no-color tfplan) >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+          terraform apply -auto-approve -input=false -no-color tfplan
+
+      # Add a comment to pull requests with apply results
+      - name: Add Apply Comment
+        if: github.event.pull_request.merged == true
+        id: apply-comment
+        uses: peter-evans/create-or-update-comment@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            ### Terraform Apply Result
+
+            - environment: **`${{ steps.vars.outputs.environment }}`**
+            - project (region): **`${{ steps.vars.outputs.region }}`**
+            - execution: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            :rocket: Terraform code in main branch has been applied automatically and result in the following changes:
+
+            ```
+            ${{ steps.apply.outputs.summary }}
+            ```
+
+            *Pusher: **@${{ github.actor }}**, Working Directory: **`${{ matrix.dir }}`**, Cloud Provider: **`${{ steps.vars.outputs.cloud }}`***
