@@ -30,7 +30,6 @@ jobs:
       - name: Test shell
         run: |
 
-          # ${{ x && 'ifTrue' || 'ifFalse' }}
           echo ${{ inputs.test-a == 'true' && '--test-a' || '' }}
           echo ${{ inputs.test-b == 'true' && '--test-b' || '' }}
 
