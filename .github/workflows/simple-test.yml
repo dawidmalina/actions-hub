@@ -1,0 +1,41 @@
+name: Simple test
+
+on:
+  # define reusable section
+  workflow_call:
+    inputs:
+      test-a:
+        description: "Define test a"
+        required: true
+        type: string
+      test-b:
+        description: "Define test b"
+        required: true
+        type: string
+
+env:
+  TERRAFORM_VERSION: 1.4.3
+
+jobs:
+  prepare:
+    name: prepare
+    runs-on: ubuntu-latest
+    steps:
+      # - uses: actions/checkout@v3
+      #   with:
+      #     ref: main
+      #     fetch-depth: 1
+      - name: Test shell
+        run: |
+          echo ${{ inputs.test-a }}
+          echo ${{ inputs.test-b }}
+
+          # if [ -d "${{ inputs.project_path }}" ]; then
+          #     echo "Directory ${{ inputs.project_path }} exists."
+          #     echo "all_changed_files=[\"${{ inputs.project_path }}\"]" >> "$GITHUB_OUTPUT"
+          #     echo "any_changed=true" >> "$GITHUB_OUTPUT"
+          # else
+          #     echo "Warnining: Directory ${{ inputs.project_path }} does not exists."
+          #     echo "all_changed_files=[]" >> "$GITHUB_OUTPUT"
+          #     echo "any_changed=false" >> "$GITHUB_OUTPUT"
+          # fi
