@@ -30,8 +30,10 @@ jobs:
       - name: Test shell
         run: |
 
-          echo ${{ inputs.test-a == 'true' && '--test-a' || '' }}
-          echo ${{ inputs.test-b == 'true' && '--test-b' || '' }}
+          echo build \
+            ${{ inputs.test-a == 'true' && '--test-a' || '' }} \
+            ${{ inputs.test-b == 'true' && '--test-b' || '' }} \
+            params
 
           # if [ -d "${{ inputs.project_path }}" ]; then
           #     echo "Directory ${{ inputs.project_path }} exists."
