@@ -29,8 +29,10 @@ jobs:
       #     fetch-depth: 1
       - name: Test shell
         run: |
-          echo ${{ inputs.test-a }}
-          echo ${{ inputs.test-b }}
+
+          # ${{ x && 'ifTrue' || 'ifFalse' }}
+          echo ${{ inputs.test-a == 'true' && '--test-a' || '' }}
+          echo ${{ inputs.test-b == 'true' && '--test-b' || '' }}
 
           # if [ -d "${{ inputs.project_path }}" ]; then
           #     echo "Directory ${{ inputs.project_path }} exists."
