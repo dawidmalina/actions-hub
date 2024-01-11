@@ -8,10 +8,12 @@ on:
         description: "Define test a"
         # required: true
         type: string
+        default: 'false'
       test-b:
         description: "Define test b"
         # required: true
         type: string
+        default: 'true'
 
 env:
   TERRAFORM_VERSION: 1.4.3
