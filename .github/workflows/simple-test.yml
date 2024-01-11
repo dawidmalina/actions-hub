@@ -41,8 +41,8 @@ jobs:
           echo build \
             ${{ inputs.test-a == 'true' && '--test-a' || '' }} \
             ${{ inputs.test-b == 'true' && '--test-b' || '' }} \
-            ${{ inputs.param-1 != '' && "--param-1=${{ inputs.param-1 }}" || '' }} \
-            ${{ inputs.param-2 != '' && "--param-2=${{ inputs.param-2 }}" || '' }} \
+            ${{ inputs.param-1 != '' && '--param-1='"${{ inputs.param-1 }}" || '' }} \
+            ${{ inputs.param-2 != '' && '--param-2='"${{ inputs.param-2 }}" || '' }} \
             params
 
           # if [ -d "${{ inputs.project_path }}" ]; then
