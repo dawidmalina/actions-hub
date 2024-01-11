@@ -6,11 +6,11 @@ on:
     inputs:
       test-a:
         description: "Define test a"
-        required: true
+        # required: true
         type: string
       test-b:
         description: "Define test b"
-        required: true
+        # required: true
         type: string
 
 env:
