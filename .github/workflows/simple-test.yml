@@ -14,6 +14,14 @@ on:
         # required: true
         type: string
         default: 'true'
+      param-1:
+        description: "Define param 1"
+        type: string
+        default: ''
+      param-2:
+        description: "Define param 2"
+        type: string
+        default: 'value'
 
 env:
   TERRAFORM_VERSION: 1.4.3
@@ -33,6 +41,8 @@ jobs:
           echo build \
             ${{ inputs.test-a == 'true' && '--test-a' || '' }} \
             ${{ inputs.test-b == 'true' && '--test-b' || '' }} \
+            ${{ inputs.param-1 != '' && '--param-1='inputs.param-1 || '' }} \
+            ${{ inputs.param-2 != '' && '--param-2='inputs.param-2 || '' }} \
             params
 
           # if [ -d "${{ inputs.project_path }}" ]; then
